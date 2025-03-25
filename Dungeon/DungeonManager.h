@@ -38,6 +38,7 @@ private:
     
     std::vector<DungeonInstance*> instances;
     std::queue<std::pair<int, int>> partyQueue; // Pair of (partyID, duration)
+	bool stopProcessing = false;
 
     std::mutex queueMutex;
     std::condition_variable instanceNotifier;

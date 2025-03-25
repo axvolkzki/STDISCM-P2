@@ -51,24 +51,34 @@ void DungeonManager::addPartyToQueue(int partyID, int duration) {
 void DungeonManager::processParties() {
     std::vector<std::thread> instanceThreads;
 
-    while (!partyQueue.empty()) {
-        instanceSemaphore.acquire(); // Wait for an available instance
+    for (auto& instance : instances) {
+        instanceThreads.emplace_back([this, instance]() {
+            while (true) {
+                std::unique_lock<std::mutex> lock(queueMutex);
+                instanceNotifier.wait(lock, [this] { return stopProcessing || !partyQueue.empty(); });
 
-        queueMutex.lock();
-        auto [partyID, duration] = partyQueue.front();
-        partyQueue.pop();
-        queueMutex.unlock();
-
-        instanceThreads.emplace_back([this, partyID, duration]() {
-            for (auto& instance : instances) {
-                if (!instance->isActive()) {
-                    instance->executeParty(partyID, duration);
-                    instanceSemaphore.release(); // Release instance when done
-                    break;
+                if (stopProcessing && partyQueue.empty()) {
+                    return; // Exit thread when processing is stopped
                 }
+
+                auto [partyID, duration] = partyQueue.front();
+                partyQueue.pop();
+                lock.unlock();
+
+                instanceSemaphore.acquire();
+                instance->executeParty(partyID, duration);
+                instanceSemaphore.release();
             }
-            });
+        });
     }
+
+    // Wait for all parties to finish processing
+    std::this_thread::sleep_for(std::chrono::seconds(1)); // Ensure all parties start processing
+    {
+        std::lock_guard<std::mutex> lock(queueMutex);
+        stopProcessing = true;
+    }
+    instanceNotifier.notify_all(); // Wake up all waiting threads
 
     // Join all threads before printing summary
     for (auto& thread : instanceThreads) {
