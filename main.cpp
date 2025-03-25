@@ -1,31 +1,51 @@
 #include "Utility/TypeDefRepo.h"
 #include "Config/GlobalConfig.h"
-//#include "Dungeon/DungeonManager.h"
+#include "Dungeon/DungeonManager.h"
+
+int randomInt(int min, int max) {
+	return rand() % (max - min + 1) + min;
+}
+
 
 int main() {
     // Variables
     bool running = true;
     bool isConfigured = false;
-    int maxDungeon = 0;
+	int maxInstance = 0;
 
     // Configure
     GlobalConfig::initialize();
     isConfigured = GlobalConfig::getInstance()->askForPartyQueueConfig();
     GlobalConfig::getInstance()->printPartyQueueConfig();
 
-    // DungeonManager
-    maxDungeon = GlobalConfig::getInstance()->getMaxDungeon();
-    /*DungeonManager::initialize(maxDungeon);*/
+	// DungeonManager
+    DungeonManager::initialize();
+	DungeonManager::getInstance()->printInstanceStatus();
+    
+
+	// Form party based on configuration
+	int maxParties = GlobalConfig::getInstance()->getMaxNumParties();
+	for (int i = 0; i < maxParties; i++) {
+		int duration = randomInt(GlobalConfig::getInstance()->getMinTime(), GlobalConfig::getInstance()->getMaxTime());
+		DungeonManager::getInstance()->addPartyToQueue(i, duration);
+	}
+    
+	cout << "[SYSTEM] All parties have been formed and added to the queue!\n" << endl;
+
+	// Start processing parties
+	DungeonManager::getInstance()->processParties();
+
+	// Wait for 5 seconds
+    this_thread::sleep_for(std::chrono::seconds(5));
+
+	// Print summary
+	DungeonManager::getInstance()->printSummary();
 
 
-    // Main loop
-    while (running && isConfigured) {
-        running = false;
-    }
 
     // Destroy
     GlobalConfig::destroy();
-    /*DungeonManager::destroy();*/
+    DungeonManager::destroy();
 
 
     return 0;
