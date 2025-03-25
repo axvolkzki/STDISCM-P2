@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,14 +129,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Config\GlobalConfig.cpp" />
+    <ClCompile Include="Dungeon\DungeonInstance.cpp" />
+    <ClCompile Include="Dungeon\DungeonManager.cpp" />
     <ClCompile Include="Utility\Colors.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".gitignore" />
+    <None Include="main.exe" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config\GlobalConfig.h" />
+    <ClInclude Include="Dungeon\DungeonInstance.h" />
+    <ClInclude Include="Dungeon\DungeonManager.h" />
     <ClInclude Include="Utility\Colors.h" />
     <ClInclude Include="Utility\TypeDefRepo.h" />
   </ItemGroup>

@@ -3,6 +3,7 @@
 #include <limits>
 
 #include "../Utility/TypeDefRepo.h"
+#include "../Utility/Colors.h"
 
 class GlobalConfig
 {
@@ -15,7 +16,13 @@ public:
     bool askForPartyQueueConfig();
     void printPartyQueueConfig();
 
-    int getMaxDungeon();
+	int getMaxInstances() const { return partyQueueConfig.n; }
+	int getTankPlayers() const { return partyQueueConfig.t; }
+	int getHealerPlayers() const { return partyQueueConfig.h; }
+	int getDPSPlayers() const { return partyQueueConfig.d; }
+	int getMinTime() const { return partyQueueConfig.t1; }
+	int getMaxTime() const { return partyQueueConfig.t2; }
+	int getMaxNumParties() const { return maxNumParties; }
 
 private:
     GlobalConfig();
@@ -32,11 +39,14 @@ private:
     };
 
     Configuration partyQueueConfig;
+    Colors color;
     bool isConfigured;
+    int maxNumParties;
 
     bool isValidInt(const std::string& input, unsigned int& output);
     int getValidInt();
 
+	int computeMaxParties(int tanks, int healers, int dps);
     void configurePartyQueue(unsigned int n, unsigned int t, unsigned int h, unsigned int d, unsigned int t1, unsigned int t2);
 
 };

@@ -1,13 +1,14 @@
 #include "GlobalConfig.h"
 #include <iostream>
 
+
+
 using namespace std;
 GlobalConfig* GlobalConfig::sharedInstance = nullptr;
 
 GlobalConfig::GlobalConfig() {
-    // Set default configuration
-    // this->configurePartyQueue(10, 2, 2, 6);
     this->configurePartyQueue(0, 0, 0, 0, 0, 0);
+	this->maxNumParties = 0;
     this->isConfigured = false;
 }
 
@@ -55,13 +56,17 @@ bool GlobalConfig::askForPartyQueueConfig() {
 
 
     if (n <= 0 && t <= 0 && h <= 0 && d <= 0 && t1 <= 0 && t2 <= 0) {
-        std::cout << "Configuration failed. All values must be greater than 0." << std::endl;
+        cout << "Configuration failed. All values must be greater than 0." << endl;
         this->isConfigured = false;
     }
-    else {
-        std::cout << "Configuration successful." << std::endl;
+	else {
+		cout << endl;
+		this->color.green();
+        cout << "[SYSTEM] Configuration successful." << endl;
+		this->color.reset();
         this->configurePartyQueue(n, t, h, d, t1, t2);
         this->isConfigured = true;
+		this->maxNumParties = this->computeMaxParties(t, h, d);
     }
 
     return this->isConfigured;
@@ -93,33 +98,46 @@ bool GlobalConfig::isValidInt(const std::string& input, unsigned int& output)
         return true;
     }
     catch (const std::out_of_range&) {
-        std::cerr << "Error: Number out of range.\n";
+        this->color.red();
+        cerr << "Error: Number out of range.\n";
+        this->color.reset();
         return false;
     }
     catch (const std::invalid_argument&) {
-        std::cerr << "Error: Invalid input.\n";
+        this->color.red();
+        cerr << "Error: Invalid input.\n";
+        this->color.reset();
         return false;
     }
 }
 
 int GlobalConfig::getValidInt()
 {
-    std::string input;
+    String input;
     unsigned int number;
 
     while (true) {
-        std::cout << "Enter a valid unsigned integer: ";
-        std::cin >> input;
+        cout << "Enter a valid unsigned integer: ";
+        cin >> input;
 
         if (isValidInt(input, number)) {
             return number;
         }
         else {
-            std::cerr << "Invalid input. Please enter a valid unsigned integer.\n";
+			this->color.red();
+			cerr << "Invalid input. Please enter a valid unsigned integer." << endl;
+			this->color.reset();
         }
     }
 }
 
+
+int GlobalConfig::computeMaxParties(int tanks, int healers, int dps)
+{
+    int dpsParties = dps / 3;
+
+    return std::min({ tanks, healers, dpsParties });
+}
 
 void GlobalConfig::configurePartyQueue(unsigned int n, unsigned int t, unsigned int h, unsigned int d, unsigned int t1, unsigned int t2) {
     this->partyQueueConfig.n = n;
@@ -131,7 +149,8 @@ void GlobalConfig::configurePartyQueue(unsigned int n, unsigned int t, unsigned 
 }
 
 void GlobalConfig::printPartyQueueConfig() {
-    cout << "Party Queue Configuration" << endl;
+	this->color.blue();
+    cout << "[SYSTEM] LFG Configuration" << endl;
     cout << "------------------------" << endl;
     cout << "Maximum number of concurrent instances: " << this->partyQueueConfig.n << endl;
     cout << "Number of tank players in the queue: " << this->partyQueueConfig.t << endl;
@@ -139,10 +158,8 @@ void GlobalConfig::printPartyQueueConfig() {
     cout << "Number of DPS players in the queue: " << this->partyQueueConfig.d << endl;
     cout << "Minimum time before an instance is finished: " << this->partyQueueConfig.t1 << endl;
     cout << "Maximum time before an instance is finished: " << this->partyQueueConfig.t2 << endl;
+	cout << "Maximum number of parties formed: " << this->maxNumParties << endl;
+	cout << "------------------------" << endl;
+	this->color.reset();
     cout << endl;
-}
-
-int GlobalConfig::getMaxDungeon()
-{
-    return this->partyQueueConfig.n;
 }
