@@ -42,8 +42,10 @@ void DungeonManager::destroy() {
 }
 
 void DungeonManager::addPartyToQueue(int partyID, int duration) {
-    std::lock_guard<std::mutex> lock(queueMutex);
-    partyQueue.push({ partyID, duration });
+    {
+        std::lock_guard<std::mutex> lock(queueMutex);
+        partyQueue.push({ partyID, duration });
+    }
 	instanceNotifier.notify_one(); // Notify waiting threads to start processing
 }
 
@@ -56,7 +58,10 @@ void DungeonManager::processParties() {
         instanceThreads.emplace_back([this, instance]() {
             while (true) {
                 std::unique_lock<std::mutex> lock(queueMutex);
-				instanceNotifier.wait(lock, [this] { return stopProcessing || !partyQueue.empty(); });  // Wait for notification
+				
+                instanceNotifier.wait(lock, [this] { 
+                    return stopProcessing || !partyQueue.empty(); 
+                });  // Wait for notification
 
                 if (stopProcessing && partyQueue.empty()) {     // Exit thread when processing is stopped
                     return;                                     
@@ -91,6 +96,7 @@ void DungeonManager::processParties() {
 
 void DungeonManager::printInstanceStatus() {
 	this->color.yellow();
+	std::lock_guard<std::mutex> lock(printMutex);
     cout << "\nCurrent Dungeon Instances:\n";
     for (auto& instance : instances) {
         instance->printStatus();
@@ -101,6 +107,7 @@ void DungeonManager::printInstanceStatus() {
 
 void DungeonManager::printSummary()
 {
+	std::lock_guard<std::mutex> lock(printMutex);
 	this->color.yellow();
     cout << "\n---- Dungeon Execution Summary ----\n";
     cout << "-----------------------------------" << endl;

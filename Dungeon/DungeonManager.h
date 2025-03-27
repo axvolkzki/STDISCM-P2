@@ -41,6 +41,7 @@ private:
 	bool stopProcessing = false;
 
 	std::mutex queueMutex;						    // Mutex for queue
+	std::mutex printMutex;                          // Mutex for printing
 	std::condition_variable instanceNotifier;       // Notifier for instances
 	std::counting_semaphore<> instanceSemaphore;    // Semaphore to limit number of instances
 };
