@@ -12,7 +12,7 @@
     ```
 4. Compile the program.
     ```
-    g++ -std=c++20 Config/GlobalConfig.cpp Dungeon/DungeonManager.cpp Utility/Colors.cpp main.cpp -o main.exe
+    g++ -std=c++20 Config/GlobalConfig.cpp Dungeon/DungeonInstance.cpp Dungeon/DungeonManager.cpp Utility/Colors.cpp main.cpp -o main.exe
     ```
 5. Run the executable file.
     ```

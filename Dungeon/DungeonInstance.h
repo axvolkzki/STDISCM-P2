@@ -20,6 +20,7 @@ private:
     int totalServed;
     int totalTimeServed;
 	std::mutex instanceMutex;
+	std::mutex printMutex;
 
 	Colors color;
 };

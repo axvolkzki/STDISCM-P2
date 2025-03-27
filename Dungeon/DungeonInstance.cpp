@@ -8,12 +8,12 @@ using namespace std;
 DungeonInstance::DungeonInstance(int id) : instanceID(id), active(false), totalServed(0), totalTimeServed(0) {}
 
 void DungeonInstance::executeParty(int partyID, int duration) {
-    std::lock_guard<std::mutex> lock(instanceMutex);
+    std::lock_guard<std::mutex> lock(this->instanceMutex);
     active = true;
     totalServed++;
     totalTimeServed += duration;
 
-	std::lock_guard<std::mutex> lock2(std::mutex());                // Lock to prevent interleaving of output
+	std::lock_guard<std::mutex> lock2(this->printMutex);                // Lock to prevent interleaving of output
 	this->active ? this->color.green() : this->color.red();
     cout << "[Active] Instance " << instanceID << " executing Party " << partyID << " for " << duration << "s." << endl;
 
@@ -23,18 +23,18 @@ void DungeonInstance::executeParty(int partyID, int duration) {
 }
 
 bool DungeonInstance::isActive() {
-    std::lock_guard<std::mutex> lock(instanceMutex);
+    std::lock_guard<std::mutex> lock(this->instanceMutex);
     return active;
 }
 
 void DungeonInstance::printStatus() {
-    std::lock_guard<std::mutex> lock(instanceMutex);
+    std::lock_guard<std::mutex> lock(this->printMutex);
 	this->active ? this->color.green() : this->color.red();
     cout << "[" << (active ? "Active" : "Empty") << "] Instance " << instanceID << endl;
 }
 
 void DungeonInstance::printSummary() {
-    std::lock_guard<std::mutex> lock(instanceMutex);
+    std::lock_guard<std::mutex> lock(this->printMutex);
 	this->color.yellow();
     cout << "Instance " << instanceID << endl;
     cout << "\tServed Parties       : " << totalServed << endl;

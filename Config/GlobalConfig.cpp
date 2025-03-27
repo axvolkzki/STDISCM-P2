@@ -139,7 +139,7 @@ int GlobalConfig::computeMaxParties(int tanks, int healers, int dps)
 {
     int dpsParties = dps / 3;
 
-    return std::min({ tanks, healers, dpsParties });
+    return std::min(std::min(tanks, healers), dpsParties);
 }
 
 void GlobalConfig::configurePartyQueue(unsigned int n, unsigned int t, unsigned int h, unsigned int d, unsigned int t1, unsigned int t2) {
