@@ -2,6 +2,8 @@
 #include <iostream>
 #include <mutex>
 
+#include "../Utility/Colors.h"
+
 class DungeonInstance {
 public:
     DungeonInstance(int id);
@@ -18,4 +20,6 @@ private:
     int totalServed;
     int totalTimeServed;
 	std::mutex instanceMutex;
+
+	Colors color;
 };

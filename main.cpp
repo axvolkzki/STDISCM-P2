@@ -2,16 +2,19 @@
 #include "Config/GlobalConfig.h"
 #include "Dungeon/DungeonManager.h"
 
-int randomInt(int min, int max) {
-	return rand() % (max - min + 1) + min;
-}
+// Function Prototypes
+int randomInt(int min, int max);
+int displayBanner();
 
-
+// Main Function
 int main() {
     // Variables
     bool running = true;
     bool isConfigured = false;
 	int maxInstance = 0;
+
+	// Display banner
+	displayBanner();
 
     // Configure
     GlobalConfig::initialize();
@@ -41,12 +44,26 @@ int main() {
 	// Print summary
 	DungeonManager::getInstance()->printSummary();
 
-
-
     // Destroy
     GlobalConfig::destroy();
     DungeonManager::destroy();
 
 
     return 0;
+}
+
+// Function Definitions
+int randomInt(int min, int max) {
+	return rand() % (max - min + 1) + min;
+}
+
+int displayBanner() {
+	cout << "---------------------------------------------------" << endl;
+	cout << "------------- Welcome to Dungeon Party ------------" << endl;
+	cout << "---------------------------------------------------" << endl;
+	cout << endl;
+	cout << "Developed by: ABENOJA, Amelia Joyce L.		S14" << endl;
+	cout << endl;
+	cout << endl;
+	return 0;
 }
