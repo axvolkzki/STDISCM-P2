@@ -35,14 +35,23 @@ private:
 	int tankCount;
 	int healerCount;
 	int dpsCount;
+    bool stopProcessing;
     
     std::vector<DungeonInstance*> instances;
-    std::queue<std::pair<int, int>> partyQueue;     // Pair of (partyID, duration)
-	bool stopProcessing = false;
+    
+    struct CompareParty {
+        bool operator()(const std::pair<int, int>& a, const std::pair<int, int>& b) {
+            return a.second > b.second;  // Min-heap: shortest duration first
+        }
+    };
+    std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, CompareParty> partyQueue;
+	
 
 	std::mutex queueMutex;						    // Mutex for queue
 	std::mutex printMutex;                          // Mutex for printing
 	std::condition_variable instanceNotifier;       // Notifier for instances
 	std::counting_semaphore<> instanceSemaphore;    // Semaphore to limit number of instances
+
+	std::pair<int, int> fetchNextPartyFromQueue();
 };
 

@@ -13,10 +13,23 @@ DungeonManager::DungeonManager()
 	this->tankCount = GlobalConfig::getInstance()->getTankPlayers();
 	this->healerCount = GlobalConfig::getInstance()->getHealerPlayers();
 	this->dpsCount = GlobalConfig::getInstance()->getDPSPlayers();
+	this->stopProcessing = false;
 
 	for (int i = 0; i < this->maxInstances; i++) {
 		instances.push_back(new DungeonInstance(i));
 	}
+}
+
+std::pair<int, int> DungeonManager::fetchNextPartyFromQueue()
+{
+    std::unique_lock<std::mutex> lock(queueMutex);
+    instanceNotifier.wait(lock, [this] { return stopProcessing || !partyQueue.empty(); });
+
+    if (stopProcessing && partyQueue.empty()) return { -1, -1 }; // Return invalid pair to indicate exit.
+
+    auto [partyID, duration] = partyQueue.top();
+    partyQueue.pop();
+    return { partyID, duration };
 }
 
 DungeonManager* DungeonManager::getInstance() {
@@ -42,10 +55,8 @@ void DungeonManager::destroy() {
 }
 
 void DungeonManager::addPartyToQueue(int partyID, int duration) {
-    {
-        std::lock_guard<std::mutex> lock(queueMutex);
-        partyQueue.push({ partyID, duration });
-    }
+    std::lock_guard<std::mutex> lock(queueMutex);
+    partyQueue.emplace(partyID, duration);
 	instanceNotifier.notify_one(); // Notify waiting threads to start processing
 }
 
@@ -57,19 +68,8 @@ void DungeonManager::processParties() {
     for (auto& instance : instances) {
         instanceThreads.emplace_back([this, instance]() {
             while (true) {
-                std::unique_lock<std::mutex> lock(queueMutex);
-				
-                instanceNotifier.wait(lock, [this] { 
-                    return stopProcessing || !partyQueue.empty(); 
-                });  // Wait for notification
-
-                if (stopProcessing && partyQueue.empty()) {     // Exit thread when processing is stopped
-                    return;                                     
-                }
-
-                auto [partyID, duration] = partyQueue.front();
-                partyQueue.pop();
-                lock.unlock();
+                auto [partyID, duration] = fetchNextPartyFromQueue();
+                if (partyID == -1) return;                      // Stop execution if no more parties
 
 				instanceSemaphore.acquire();                    // Acquire semaphore to limit number of instances
                 instance->executeParty(partyID, duration);
