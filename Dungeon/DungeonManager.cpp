@@ -6,7 +6,7 @@ using namespace std;
 DungeonManager* DungeonManager::sharedInstance = nullptr;
 
 DungeonManager::DungeonManager()
-	: instanceSemaphore(GlobalConfig::getInstance()->getMaxInstances())  // Correct way to initialize
+	: instanceSemaphore(GlobalConfig::getInstance()->getMaxInstances())
 {
 	this->maxInstances = GlobalConfig::getInstance()->getMaxInstances();
 	this->maxParties = GlobalConfig::getInstance()->getMaxNumParties();
@@ -33,7 +33,7 @@ void DungeonManager::initialize() {
     }
 
     // Debugger
-	cout << "[DEBUGGER] DungeonManager initialized!" << endl;
+	// cout << "[DEBUGGER] DungeonManager initialized!" << endl;
 }
 
 void DungeonManager::destroy() {
@@ -44,36 +44,37 @@ void DungeonManager::destroy() {
 void DungeonManager::addPartyToQueue(int partyID, int duration) {
     std::lock_guard<std::mutex> lock(queueMutex);
     partyQueue.push({ partyID, duration });
-    instanceNotifier.notify_one(); // Notify waiting threads
+	instanceNotifier.notify_one(); // Notify waiting threads to start processing
 }
 
 
 void DungeonManager::processParties() {
     std::vector<std::thread> instanceThreads;
 
+	// Create threads for each instance
     for (auto& instance : instances) {
         instanceThreads.emplace_back([this, instance]() {
             while (true) {
                 std::unique_lock<std::mutex> lock(queueMutex);
-                instanceNotifier.wait(lock, [this] { return stopProcessing || !partyQueue.empty(); });
+				instanceNotifier.wait(lock, [this] { return stopProcessing || !partyQueue.empty(); });  // Wait for notification
 
-                if (stopProcessing && partyQueue.empty()) {
-                    return; // Exit thread when processing is stopped
+                if (stopProcessing && partyQueue.empty()) {     // Exit thread when processing is stopped
+                    return;                                     
                 }
 
                 auto [partyID, duration] = partyQueue.front();
                 partyQueue.pop();
                 lock.unlock();
 
-                instanceSemaphore.acquire();
+				instanceSemaphore.acquire();                    // Acquire semaphore to limit number of instances
                 instance->executeParty(partyID, duration);
-                instanceSemaphore.release();
+				instanceSemaphore.release();                    // Release semaphore to allow other instances to execute
             }
         });
     }
 
-    // Wait for all parties to finish processing
-    std::this_thread::sleep_for(std::chrono::seconds(1)); // Ensure all parties start processing
+	// Sleep for 1 second before stopping processing
+    std::this_thread::sleep_for(std::chrono::seconds(1)); 
     {
         std::lock_guard<std::mutex> lock(queueMutex);
         stopProcessing = true;
@@ -89,26 +90,33 @@ void DungeonManager::processParties() {
 }
 
 void DungeonManager::printInstanceStatus() {
+	this->color.yellow();
     cout << "\nCurrent Dungeon Instances:\n";
     for (auto& instance : instances) {
         instance->printStatus();
     }
+	this->color.reset();
 }
 
 
 void DungeonManager::printSummary()
 {
-    cout << "\n--- Dungeon Execution Summary ---\n";
-    cout << "----------------------" << endl;
+	this->color.yellow();
+    cout << "\n---- Dungeon Execution Summary ----\n";
+    cout << "-----------------------------------" << endl;
     cout << "Max Instances      : " << this->maxInstances << endl;
     cout << "Max Parties        : " << this->maxParties << endl;
     cout << "Remaining Tanks    : " << this->tankCount - this->maxParties << endl;
     cout << "Remaining Healers  : " << this->healerCount - this->maxParties << endl;
     cout << "Remaining DPS      : " << this->dpsCount - (this->maxParties * 3) << endl;
 
+	cout << "\nSummary of Instances:" << endl;
 	for (auto& instance : instances) {
 		instance->printSummary();
 	}
+
+	cout << "-----------------------------------" << endl;
+	this->color.reset();
 }
 
 

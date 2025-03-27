@@ -37,11 +37,11 @@ private:
 	int dpsCount;
     
     std::vector<DungeonInstance*> instances;
-    std::queue<std::pair<int, int>> partyQueue; // Pair of (partyID, duration)
+    std::queue<std::pair<int, int>> partyQueue;     // Pair of (partyID, duration)
 	bool stopProcessing = false;
 
-    std::mutex queueMutex;
-    std::condition_variable instanceNotifier;
-    std::counting_semaphore<> instanceSemaphore;
+	std::mutex queueMutex;						    // Mutex for queue
+	std::condition_variable instanceNotifier;       // Notifier for instances
+	std::counting_semaphore<> instanceSemaphore;    // Semaphore to limit number of instances
 };
 

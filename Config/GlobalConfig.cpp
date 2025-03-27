@@ -36,22 +36,26 @@ void GlobalConfig::destroy() {
 bool GlobalConfig::askForPartyQueueConfig() {
     unsigned long int n, t, h, d, t1, t2;
 
-    cout << "Enter the maximum number of concurrent instances: ";
+    this->color.blue();
+    cout << "Enter the following with positive integer only!" << endl;
+    this->color.reset();
+
+    cout << "Maximum number of concurrent instances         : ";
     n = getValidInt();
 
-    cout << "Enter the number of tank players in the queue: ";
+    cout << "Number of tank players in the queue            : ";
     t = getValidInt();
 
-    cout << "Enter the number of healer players in the queue: ";
+    cout << "Number of healer players in the queue          : ";
     h = getValidInt();
 
-    cout << "Enter the number of DPS players in the queue: ";
+    cout << "Number of DPS players in the queue             : ";
     d = getValidInt();
 
-    cout << "Enter the minimum time before an instance is finished: ";
+    cout << "Minimum time before an instance is finished    : ";
     t1 = getValidInt();
 
-    cout << "Enter the maximum time before an instance is finished: ";
+    cout << "Maximum time before an instance is finished    : ";
     t2 = getValidInt();
 
 
@@ -117,7 +121,6 @@ int GlobalConfig::getValidInt()
     unsigned int number;
 
     while (true) {
-        cout << "Enter a valid unsigned integer: ";
         cin >> input;
 
         if (isValidInt(input, number)) {
@@ -125,7 +128,7 @@ int GlobalConfig::getValidInt()
         }
         else {
 			this->color.red();
-			cerr << "Invalid input. Please enter a valid unsigned integer." << endl;
+			cerr << "Invalid input. Please enter a valid positive integer." << endl;
 			this->color.reset();
         }
     }
@@ -152,13 +155,13 @@ void GlobalConfig::printPartyQueueConfig() {
 	this->color.blue();
     cout << "[SYSTEM] LFG Configuration" << endl;
     cout << "------------------------" << endl;
-    cout << "Maximum number of concurrent instances: " << this->partyQueueConfig.n << endl;
-    cout << "Number of tank players in the queue: " << this->partyQueueConfig.t << endl;
-    cout << "Number of healer players in the queue: " << this->partyQueueConfig.h << endl;
-    cout << "Number of DPS players in the queue: " << this->partyQueueConfig.d << endl;
+    cout << "Maximum number of concurrent instances     : " << this->partyQueueConfig.n << endl;
+    cout << "Number of tank players in the queue        : " << this->partyQueueConfig.t << endl;
+    cout << "Number of healer players in the queue      : " << this->partyQueueConfig.h << endl;
+    cout << "Number of DPS players in the queue         : " << this->partyQueueConfig.d << endl;
     cout << "Minimum time before an instance is finished: " << this->partyQueueConfig.t1 << endl;
     cout << "Maximum time before an instance is finished: " << this->partyQueueConfig.t2 << endl;
-	cout << "Maximum number of parties formed: " << this->maxNumParties << endl;
+	cout << "Maximum number of parties formed           : " << this->maxNumParties << endl;
 	cout << "------------------------" << endl;
 	this->color.reset();
     cout << endl;
