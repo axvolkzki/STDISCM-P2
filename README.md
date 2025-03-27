@@ -25,7 +25,7 @@ For easy accessibility, the following links are provided:
     cd STDISCM-P2
     ```
 4. Compile the program.
-    ```this->instanceMutex
+    ```
     g++ -std=c++20 Config/GlobalConfig.cpp Dungeon/DungeonInstance.cpp Dungeon/DungeonManager.cpp Utility/Colors.cpp main.cpp -o main.exe
     ```
 5. Run the executable file.
