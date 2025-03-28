@@ -56,7 +56,7 @@ bool GlobalConfig::askForPartyQueueConfig() {
     t1 = getValidInt();
 
     cout << "Maximum time before an instance is finished    : ";
-    t2 = getValidInt();
+	t2 = getValidMaxTime(t1);
 
 
     if (n <= 0 && t <= 0 && h <= 0 && d <= 0 && t1 <= 0 && t2 <= 0) {
@@ -130,8 +130,29 @@ int GlobalConfig::getValidInt()
 			this->color.red();
 			cerr << "Invalid input. Please enter a valid positive integer." << endl;
 			this->color.reset();
+            cout << "Try again      : ";
         }
     }
+}
+
+
+int GlobalConfig::getValidMaxTime(unsigned int minTime)
+{
+	unsigned int maxTime;
+
+	while (true) {
+		maxTime = getValidInt();
+
+		if (maxTime <= minTime) {
+			this->color.red();
+            cerr << "Error: Maximum time must be greater than minimum time." << endl;
+			this->color.reset();
+            cout << "Try again      : ";
+		}
+		else {
+			return maxTime;
+		}
+	}
 }
 
 
@@ -141,6 +162,7 @@ int GlobalConfig::computeMaxParties(int tanks, int healers, int dps)
 
     return std::min(std::min(tanks, healers), dpsParties);
 }
+
 
 void GlobalConfig::configurePartyQueue(unsigned int n, unsigned int t, unsigned int h, unsigned int d, unsigned int t1, unsigned int t2) {
     this->partyQueueConfig.n = n;

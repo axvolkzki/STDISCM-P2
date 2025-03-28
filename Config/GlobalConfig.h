@@ -45,6 +45,7 @@ private:
 
     bool isValidInt(const std::string& input, unsigned int& output);
     int getValidInt();
+    int getValidMaxTime(unsigned int minTime);
 
 	int computeMaxParties(int tanks, int healers, int dps);
     void configurePartyQueue(unsigned int n, unsigned int t, unsigned int h, unsigned int d, unsigned int t1, unsigned int t2);
